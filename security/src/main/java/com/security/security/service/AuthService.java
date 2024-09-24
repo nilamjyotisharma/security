@@ -4,7 +4,8 @@ import com.security.security.repository.AppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
+
+import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -13,17 +14,25 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private AppUserRepository appUserRepository;
-    public AppUser registerNewUser(AppUser userData) {
+    public Object registerNewUser(AppUser userData) {
         AppUser newUser = new AppUser();
-        newUser.setName(userData.getName());
-        newUser.setEmail(userData.getEmail());
-        newUser.setPhone(userData.getPhone());
-        newUser.setPassword(passwordEncoder.encode(userData.getPassword()));
-        newUser.setRole(userData.getRole());
+        AppUser checkUser = appUserRepository.findByEmail(userData.getEmail());
+        AppUser checkUserByPhone = appUserRepository.findByPhone(userData.getPhone());
+        if(checkUser != null || checkUserByPhone != null){
+            return "Email or Phone number already exist!";
+        }
+        else{
+            newUser.setName(userData.getName());
+            newUser.setEmail(userData.getEmail());
+            newUser.setPhone(userData.getPhone());
+            newUser.setPassword(passwordEncoder.encode(userData.getPassword()));
+            newUser.setRole(userData.getRole());
 
-        appUserRepository.save(newUser);
+            appUserRepository.save(newUser);
 
-        return newUser;
+            return newUser;
+        }
+
     }
 
 }

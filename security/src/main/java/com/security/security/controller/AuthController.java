@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 @RestController
 public class AuthController {
 
@@ -31,9 +33,13 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public ResponseEntity<Object> registerUser(@RequestBody AppUser userData){
-        AppUser user = authService.registerNewUser(userData);
-        return new ResponseEntity<>(userData, HttpStatus.CREATED);
+    public ResponseEntity<?> registerUser(@RequestBody AppUser userData){
+        Object user = authService.registerNewUser(userData);
+        if (user instanceof String) {  // If the result is a message indicating failure
+            return new ResponseEntity<>(user, HttpStatus.CONFLICT);  // Return 409 Conflict
+        } else {
+            return new ResponseEntity<>(user, HttpStatus.CREATED);  // Return 201 Created
+        }
     }
 
     @PostMapping("/userlogin")
